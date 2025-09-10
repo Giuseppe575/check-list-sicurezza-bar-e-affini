@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist Sicurezza Bar & Ristoranti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            transition: all 0.3s ease-in-out;
+        }
+        .section-card:hover {
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+        .input-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgb(37 99 235 / 0.2);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary {
+            background-color: #2563EB;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #1D4ED8;
+        }
+        .btn-secondary {
+            background-color: #4B5563;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #374151;
+        }
+        .btn-danger {
+            background-color: #DC2626;
+            color: white;
+            padding: 0.5rem 1rem;
+        }
+        .btn-danger:hover {
+            background-color: #B91C1C;
+        }
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            color: white;
+            background-color: #16A34A;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 1000;
+        }
+        #notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto max-w-4xl p-4 sm:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-800">Checklist di Sicurezza</h1>
+            <p class="text-lg text-gray-600 mt-2">Per Bar, Ristoranti e Attività Affini</p>
+        </header>
+
+        <form id="safety-checklist-form">
+
+            <!-- Sezione 1: Dati Anagrafici e Figure -->
+            <div class="section-card">
+                <h2 class="text-2xl font-semibold text-gray-700 border-b pb-4 mb-6">1. Dati Anagrafici e Figure Responsabili</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="denominazione" class="input-label">Denominazione</label>
+                        <input type="text" id="denominazione" name="denominazione" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="p_iva" class="input-label">P. IVA</label>
+                        <input type="text" id="p_iva" name="p_iva" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label for="sede_legale" class="input-label">Indirizzo Sede Legale</label>
+                        <input type="text" id="sede_legale" name="sede_legale" class="form-input">
+                    </div>
+                    <div class="input-group md:col-span-2">
+                        <label for="sede_operativa" class="input-label">Indirizzo Sede Operativa</label>
+                        <input type="text" id="sede_operativa" name="sede_operativa" class="form-input">
+                    </div>
+                     <div class="input-group">
+                        <label for="mail" class="input-label">Mail</label>
+                        <input type="email" id="mail" name="mail" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="telefono" class="input-label">Telefono</label>
+                        <input type="tel" id="telefono" name="telefono" class="form-input">
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-700 border-b pb-3 my-6">Figure e Responsabili</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label for="legale_rappresentante" class="input-label">Legale Rappresentante</label>
+                        <input type="text" id="legale_rappresentante" name="legale_rappresentante" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="rspp" class="input-label">R.S.P.P.</label>
+                        <input type="text" id="rspp" name="rspp" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="rls" class="input-label">R.L.S.</label>
+                        <input type="text" id="rls" name="rls" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="medico_competente" class="input-label">Medico Competente</label>
+                        <input type="text" id="medico_competente" name="medico_competente" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="addetti_antincendio" class="input-label">Addetti Antincendio (separati da virgola)</label>
+                        <input type="text" id="addetti_antincendio" name="addetti_antincendio" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="addetti_primo_soccorso" class="input-label">Addetti Primo Soccorso (separati da virgola)</label>
+                        <input type="text" id="addetti_primo_soccorso" name="addetti_primo_soccorso" class="form-input">
+                    </div>
+                    <div class="input-group">
+                        <label for="preposto" class="input-label">Preposto</label>
+                        <input type="text" id="preposto" name="preposto" class="form-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sezione 2: Macchine e Attrezzature -->
+            <div class="section-card">
+                <h2 class="text-2xl font-semibold text-gray-700 border-b pb-4 mb-6">2. Macchine ed Attrezzature</h2>
+                <div id="macchine-container">
+                    <!-- Le attrezzature verranno aggiunte qui dinamicamente -->
+                </div>
+                <button type="button" id="add-macchina" class="btn btn-secondary mt-4">Aggiungi Attrezzatura</button>
+            </div>
+
+            <!-- Sezione 3: Mansionario Dipendenti -->
+            <div class="section-card">
+                <h2 class="text-2xl font-semibold text-gray-700 border-b pb-4 mb-6">3. Mansionario Dipendenti</h2>
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left p-2">Nominativo</th>
+                            <th class="text-left p-2">Mansione</th>
+                            <th class="w-16"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="dipendenti-container">
+                        <!-- I dipendenti verranno aggiunti qui -->
+                    </tbody>
+                </table>
+                <button type="button" id="add-dipendente" class="btn btn-secondary mt-4">Aggiungi Dipendente</button>
+            </div>
+
+            <!-- Sezione 4 e 5: Aree e Ciclo Lavorativo -->
+            <div class="section-card">
+                <h2 class="text-2xl font-semibold text-gray-700 border-b pb-4 mb-6">4. Aree Aziendali / Luoghi di Lavoro</h2>
+                 <div class="input-group">
+                    <label for="aree_aziendali" class="input-label">Elenca le aree principali (es. Cucina, Sala, Bar, Magazzino)</label>
+                    <textarea id="aree_aziendali" name="aree_aziendali" rows="4" class="form-input"></textarea>
+                </div>
+
+                <h2 class="text-2xl font-semibold text-gray-700 border-b pb-4 my-6">5. Ciclo Lavorativo Aziendale (in breve)</h2>
+                 <div class="input-group">
+                    <label for="ciclo_lavorativo" class="input-label">Descrivi brevemente le fasi del ciclo lavorativo.</label>
+                    <textarea id="ciclo_lavorativo" name="ciclo_lavorativo" rows="5" class="form-input"></textarea>
+                </div>
+            </div>
+            
+            <!-- Pulsante di Esportazione -->
+            <div class="text-center mt-10">
+                <button type="submit" class="btn btn-primary text-lg">
+                    Esporta Dati in CSV
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Notifica -->
+    <div id="notification">Dati esportati con successo!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addMacchinaBtn = document.getElementById('add-macchina');
+            const macchineContainer = document.getElementById('macchine-container');
+            const addDipendenteBtn = document.getElementById('add-dipendente');
+            const dipendentiContainer = document.getElementById('dipendenti-container');
+            const form = document.getElementById('safety-checklist-form');
+            const notification = document.getElementById('notification');
+
+            let macchinaCount = 0;
+            let dipendenteCount = 0;
+
+            // --- Funzioni per aggiungere elementi dinamici ---
+
+            function addMacchina() {
+                macchinaCount++;
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 mb-4';
+                div.innerHTML = `
+                    <input type="text" name="macchina_${macchinaCount}" class="form-input flex-grow" placeholder="Es. Affettatrice, Forno, Friggitrice...">
+                    <button type="button" class="btn-danger btn remove-macchina">Rimuovi</button>
+                `;
+                macchineContainer.appendChild(div);
+            }
+
+            function addDipendente() {
+                dipendenteCount++;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="p-1"><input type="text" name="dipendente_nome_${dipendenteCount}" class="form-input" placeholder="Mario Rossi"></td>
+                    <td class="p-1"><input type="text" name="dipendente_mansione_${dipendenteCount}" class="form-input" placeholder="Cuoco"></td>
+                    <td class="p-1 text-center"><button type="button" class="btn-danger btn remove-dipendente">X</button></td>
+                `;
+                dipendentiContainer.appendChild(tr);
+            }
+
+            // Aggiungi un elemento iniziale per guidare l'utente
+            addMacchina();
+            addDipendente();
+
+            // --- Event Listeners ---
+            
+            addMacchinaBtn.addEventListener('click', addMacchina);
+            addDipendenteBtn.addEventListener('click', addDipendente);
+
+            macchineContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-macchina')) {
+                    e.target.parentElement.remove();
+                }
+            });
+
+            dipendentiContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-dipendente')) {
+                    e.target.closest('tr').remove();
+                }
+            });
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                exportToCSV();
+            });
+
+            // --- Funzione di Esportazione CSV ---
+
+            function exportToCSV() {
+                const formData = new FormData(form);
+                const data = {};
+                for(let [key, value] of formData.entries()) {
+                    data[key] = value;
+                }
+                
+                let csvContent = "Sezione;Campo;Valore\n";
+
+                // Funzione helper per sanitizzare il testo per CSV
+                const sanitize = (text) => {
+                    if (typeof text !== 'string') return '';
+                    let sanitized = text.replace(/"/g, '""'); // Escape double quotes
+                    sanitized = sanitized.replace(/(\r\n|\n|\r)/gm, " "); // Remove newlines
+                    return `"${sanitized}"`;
+                };
+
+                // 1. Dati Anagrafici e Figure
+                const anagraficaFields = {
+                    'Denominazione': data.denominazione,
+                    'P. IVA': data.p_iva,
+                    'Sede Legale': data.sede_legale,
+                    'Sede Operativa': data.sede_operativa,
+                    'Mail': data.mail,
+                    'Telefono': data.telefono,
+                    'Legale Rappresentante': data.legale_rappresentante,
+                    'R.S.P.P.': data.rspp,
+                    'R.L.S.': data.rls,
+                    'Medico Competente': data.medico_competente,
+                    'Addetti Antincendio': data.addetti_antincendio,
+                    'Addetti Primo Soccorso': data.addetti_primo_soccorso,
+                    'Preposto': data.preposto,
+                };
+
+                for(const [label, value] of Object.entries(anagraficaFields)) {
+                    if (value) {
+                         csvContent += `Dati Anagrafici e Figure;${sanitize(label)};${sanitize(value)}\n`;
+                    }
+                }
+
+                // 2. Macchine ed Attrezzature
+                document.querySelectorAll('#macchine-container input[type="text"]').forEach((input, index) => {
+                    if(input.value) {
+                       csvContent += `Macchine ed Attrezzature;Attrezzatura ${index + 1};${sanitize(input.value)}\n`;
+                    }
+                });
+                
+                // 3. Mansionario Dipendenti
+                document.querySelectorAll('#dipendenti-container tr').forEach((row, index) => {
+                    const nome = row.querySelector('input[name^="dipendente_nome_"]');
+                    const mansione = row.querySelector('input[name^="dipendente_mansione_"]');
+                    if (nome && mansione && (nome.value || mansione.value)) {
+                        csvContent += `Mansionario Dipendenti;${sanitize(nome.value)};${sanitize(mansione.value)}\n`;
+                    }
+                });
+
+                // 4. Aree Aziendali
+                if (data.aree_aziendali) {
+                     csvContent += `Aree Aziendali;Descrizione;${sanitize(data.aree_aziendali)}\n`;
+                }
+
+                // 5. Ciclo Lavorativo
+                if (data.ciclo_lavorativo) {
+                    csvContent += `Ciclo Lavorativo;Descrizione;${sanitize(data.ciclo_lavorativo)}\n`;
+                }
+                
+                // Creazione e download del file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "checklist_sicurezza.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Mostra notifica
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
