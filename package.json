@@ -1,0 +1,9 @@
+{
+  "name": "check-list-sicurezza-bar-e-affini",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Checklist di sicurezza per bar e affini",
+  "scripts": {
+    "test": "node scripts/check-conflicts.js"
+  }
+}
