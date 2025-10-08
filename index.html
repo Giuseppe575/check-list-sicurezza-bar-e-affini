@@ -140,6 +140,7 @@
         <button type="button" id="clear-data" class="btn btn-secondary text-lg">Cancella dati salvati</button>
         <button type="button" id="export-vertical" class="btn btn-primary text-lg">Esporta CSV (Sezione;Campo;Valore)</button>
         <button type="button" id="export-wide" class="btn btn-secondary text-lg">Esporta per Stampa Unione (1 riga = 1 record)</button>
+        <button type="button" id="export-json" class="btn btn-secondary text-lg">Esporta JSON</button>
       </div>
     </form>
   </div>
@@ -148,6 +149,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('safety-checklist-form');
       const addMacchinaBtn = document.getElementById('add-macchina');
       const macchineContainer = document.getElementById('macchine-container');
       const addDipendenteBtn = document.getElementById('add-dipendente');
@@ -156,9 +158,12 @@
       const saveBtn = document.getElementById('save-form');
       const restoreBtn = document.getElementById('restore-data');
       const clearBtn = document.getElementById('clear-data');
+      const exportJsonBtn = document.getElementById('export-json');
+      const STORAGE_KEY = 'checklistData';
 
       let macchinaCount = 0;
       let dipendenteCount = 0;
+      let notificationTimeout;
 
       function addMacchina(value = ''){
         macchinaCount++;
@@ -180,9 +185,11 @@
         div.appendChild(input);
         div.appendChild(removeBtn);
         macchineContainer.appendChild(div);
+        const input = div.querySelector('input');
+        if (input) input.value = value;
       }
 
-      function addDipendente({ nome = '', mansione = '' } = {}){
+      function addDipendente(nome = '', mansione = ''){
         dipendenteCount++;
         const tr = document.createElement('tr');
 
@@ -219,6 +226,9 @@
         tr.appendChild(tdActions);
 
         dipendentiContainer.appendChild(tr);
+        const [inputNome, inputMansione] = tr.querySelectorAll('input');
+        if (inputNome) inputNome.value = nome;
+        if (inputMansione) inputMansione.value = mansione;
       }
 
       addMacchinaBtn.addEventListener('click', addMacchina);
@@ -238,22 +248,22 @@
         return `"${t}"`;
       };
 
-      function collectFormData(){
-        const form = document.getElementById('safety-checklist-form');
+      function buildFormPayload(){
         const formData = new FormData(form);
         const base = Object.fromEntries(formData.entries());
 
         const attrezzature = [...macchineContainer.querySelectorAll('input[name^="Attrezzatura_"]')]
-          .map(inp => inp.value.trim())
+          .map(input => input.value.trim())
           .filter(value => value !== '');
 
         const dipendenti = [...dipendentiContainer.querySelectorAll('tr')]
           .map(row => {
             const nome = row.querySelector('input[name^="Dipendente_Nome_"]')?.value.trim() || '';
             const mansione = row.querySelector('input[name^="Dipendente_Mansione_"]')?.value.trim() || '';
+            if (!nome && !mansione) return null;
             return { nome, mansione };
           })
-          .filter(({ nome, mansione }) => nome !== '' || mansione !== '');
+          .filter(Boolean);
 
         return {
           Denominazione: base['Denominazione'] || '',
@@ -280,8 +290,8 @@
         if (!data || typeof data !== 'object') return;
 
         const setValue = (id, value = '') => {
-          const el = document.getElementById(id);
-          if (el) el.value = value;
+          const element = document.getElementById(id);
+          if (element) element.value = value;
         };
 
         setValue('denominazione', data.Denominazione);
@@ -312,61 +322,93 @@
         const dipendenti = Array.isArray(data.Dipendenti) && data.Dipendenti.length
           ? data.Dipendenti
           : [{}];
-        dipendenti.forEach(persona => addDipendente({
-          nome: persona?.nome || '',
-          mansione: persona?.mansione || ''
-        }));
+        dipendenti.forEach(persona => addDipendente(persona?.nome || '', persona?.mansione || ''));
       }
 
-      function showNotification(message){
-        if (notification){
-          notification.textContent = message;
-          notification.classList.add('show');
-          setTimeout(()=>notification.classList.remove('show'), 2500);
-        }
+      function toast(message = 'Dati esportati con successo!'){
+        if (!notification) return;
+        notification.textContent = message;
+        notification.classList.add('show');
+        clearTimeout(notificationTimeout);
+        notificationTimeout = setTimeout(()=>notification.classList.remove('show'), 2500);
       }
+
+      const serializePayload = (payload) => JSON.stringify(payload, null, 2);
+
+      const triggerJsonDownload = (jsonString, filename = 'checklist_sicurezza.json') => {
+        downloadFile(jsonString, filename, 'application/json;charset=utf-8;');
+      };
+
+      const persistPayload = (jsonString) => {
+        localStorage.setItem(STORAGE_KEY, jsonString);
+      };
+
+      const restoreSavedData = (showToast = false) => {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) {
+            if (showToast) toast('Nessun dato salvato da ripristinare.');
+            return false;
+          }
+
+          const data = JSON.parse(stored);
+          populateForm(data);
+
+          if (showToast) toast('Dati salvati ripristinati!');
+          return true;
+        } catch (error) {
+          console.error('Errore durante il ripristino dei dati salvati', error);
+          if (showToast) toast('Errore durante il ripristino dei dati.');
+          return false;
+        }
+      };
 
       saveBtn.addEventListener('click', () => {
         try {
-          const data = collectFormData();
-          const jsonString = JSON.stringify(data);
-          localStorage.setItem('checklistData', jsonString);
-          showNotification('Dati salvati localmente!');
+          const payload = buildFormPayload();
+          const jsonString = serializePayload(payload);
+          persistPayload(jsonString);
+          triggerJsonDownload(jsonString);
+          toast('Dati salvati e scaricati in JSON!');
         } catch (error) {
           console.error('Errore durante il salvataggio dei dati', error);
-          showNotification('Errore durante il salvataggio dei dati.');
+          toast('Errore durante il salvataggio dei dati.');
+        }
+      });
+
+      exportJsonBtn.addEventListener('click', () => {
+        try {
+          const payload = buildFormPayload();
+          const jsonString = serializePayload(payload);
+          triggerJsonDownload(jsonString);
+          toast('JSON esportato con successo!');
+        } catch (error) {
+          console.error('Errore durante l\'esportazione in JSON', error);
+          toast('Errore durante l\'esportazione in JSON.');
         }
       });
 
       restoreBtn.addEventListener('click', () => {
-        try {
-          const stored = localStorage.getItem('checklistData');
-          if (stored){
-            const data = JSON.parse(stored);
-            populateForm(data);
-            showNotification('Dati salvati ripristinati!');
-          } else {
-            showNotification('Nessun dato salvato da ripristinare.');
-          }
-        } catch (error) {
-          console.error('Errore durante il ripristino dei dati salvati', error);
-          showNotification('Errore durante il ripristino dei dati.');
-        }
+        restoreSavedData(true);
       });
 
       clearBtn.addEventListener('click', () => {
         try {
-          localStorage.removeItem('checklistData');
-          showNotification('Dati salvati eliminati.');
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (!stored) {
+            toast('Nessun dato salvato da eliminare.');
+            return;
+          }
+          localStorage.removeItem(STORAGE_KEY);
+          toast('Dati salvati eliminati.');
         } catch (error) {
           console.error('Errore durante la cancellazione dei dati salvati', error);
-          showNotification('Errore durante la cancellazione dei dati.');
+          toast('Errore durante la cancellazione dei dati.');
         }
       });
 
       // esportazione verticale Sezione;Campo;Valore (come il tuo attuale)
       document.getElementById('export-vertical').addEventListener('click', () => {
-        const form = document.getElementById('safety-checklist-form');
         const formData = new FormData(form);
         let csv = 'Sezione;Campo;Valore\n';
 
@@ -407,12 +449,11 @@
         if(base['Ciclo_Lavorativo']) pushRow('Ciclo Lavorativo', 'Descrizione', base['Ciclo_Lavorativo']);
 
         downloadCSV(csv, 'checklist_sicurezza.csv');
-        showNotification('Dati esportati con successo!');
+        toast('Dati esportati con successo!');
       });
 
       // esportazione WIDE: 1 riga = 1 record (intestazioni = campi) -> perfetto per Stampa Unione
       document.getElementById('export-wide').addEventListener('click', () => {
-        const form = document.getElementById('safety-checklist-form');
         const formData = new FormData(form);
         const base = Object.fromEntries(formData.entries());
 
@@ -458,29 +499,28 @@
         const csv = headers.join(';') + '\n' + values.join(';') + '\n';
 
         downloadCSV(csv, 'checklist_sicurezza_mailmerge.csv');
-        showNotification('Dati esportati con successo!');
+        toast('Dati esportati con successo!');
       });
 
       function downloadCSV(content, filename){
-        const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = filename; a.style.display = 'none';
-        document.body.appendChild(a); a.click();
-        URL.revokeObjectURL(url); a.remove();
+        downloadFile(content, filename, 'text/csv;charset=utf-8;');
       }
 
-      const stored = localStorage.getItem('checklistData');
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
-          populateForm(data);
-        } catch (error) {
-          console.error('Errore durante il caricamento dei dati salvati', error);
-          addMacchina();
-          addDipendente();
-        }
-      } else {
+      function downloadFile(content, filename, mimeType){
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        a.remove();
+      }
+
+      const initialised = restoreSavedData();
+      if (!initialised) {
         addMacchina();
         addDipendente();
       }
