@@ -169,10 +169,21 @@
         macchinaCount++;
         const div = document.createElement('div');
         div.className = 'flex items-center gap-4 mb-4';
-        div.innerHTML = `
-          <input type="text" name="Attrezzatura_${macchinaCount}" class="form-input flex-grow" placeholder="Es. Affettatrice, Forno, Friggitrice...">
-          <button type="button" class="btn-danger btn remove-macchina">Rimuovi</button>
-        `;
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = `Attrezzatura_${macchinaCount}`;
+        input.className = 'form-input flex-grow';
+        input.placeholder = 'Es. Affettatrice, Forno, Friggitrice...';
+        input.value = value;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-danger btn remove-macchina';
+        removeBtn.textContent = 'Rimuovi';
+
+        div.appendChild(input);
+        div.appendChild(removeBtn);
         macchineContainer.appendChild(div);
         const input = div.querySelector('input');
         if (input) input.value = value;
@@ -181,11 +192,39 @@
       function addDipendente(nome = '', mansione = ''){
         dipendenteCount++;
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="p-1"><input type="text" name="Dipendente_Nome_${dipendenteCount}" class="form-input" placeholder="Mario Rossi"></td>
-          <td class="p-1"><input type="text" name="Dipendente_Mansione_${dipendenteCount}" class="form-input" placeholder="Cuoco"></td>
-          <td class="p-1 text-center"><button type="button" class="btn-danger btn remove-dipendente">X</button></td>
-        `;
+
+        const tdNome = document.createElement('td');
+        tdNome.className = 'p-1';
+        const inputNome = document.createElement('input');
+        inputNome.type = 'text';
+        inputNome.name = `Dipendente_Nome_${dipendenteCount}`;
+        inputNome.className = 'form-input';
+        inputNome.placeholder = 'Mario Rossi';
+        inputNome.value = nome;
+        tdNome.appendChild(inputNome);
+
+        const tdMansione = document.createElement('td');
+        tdMansione.className = 'p-1';
+        const inputMansione = document.createElement('input');
+        inputMansione.type = 'text';
+        inputMansione.name = `Dipendente_Mansione_${dipendenteCount}`;
+        inputMansione.className = 'form-input';
+        inputMansione.placeholder = 'Cuoco';
+        inputMansione.value = mansione;
+        tdMansione.appendChild(inputMansione);
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'p-1 text-center';
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-danger btn remove-dipendente';
+        removeBtn.textContent = 'X';
+        tdActions.appendChild(removeBtn);
+
+        tr.appendChild(tdNome);
+        tr.appendChild(tdMansione);
+        tr.appendChild(tdActions);
+
         dipendentiContainer.appendChild(tr);
         const [inputNome, inputMansione] = tr.querySelectorAll('input');
         if (inputNome) inputNome.value = nome;
