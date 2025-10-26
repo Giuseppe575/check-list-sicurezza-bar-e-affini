@@ -186,6 +186,8 @@
         div.appendChild(input);
         div.appendChild(removeBtn);
         macchineContainer.appendChild(div);
+        const input = div.querySelector('input');
+        if (input) input.value = value;
       }
 
       function addDipendente(nome = '', mansione = ''){
@@ -225,6 +227,9 @@
         tr.appendChild(tdActions);
 
         dipendentiContainer.appendChild(tr);
+        const [inputNome, inputMansione] = tr.querySelectorAll('input');
+        if (inputNome) inputNome.value = nome;
+        if (inputMansione) inputMansione.value = mansione;
       }
 
       addMacchinaBtn.addEventListener('click', addMacchina);
